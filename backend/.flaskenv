@@ -1,0 +1,2 @@
+FLASK_APP=entrypoint.py
+FLASK_ENV=development
