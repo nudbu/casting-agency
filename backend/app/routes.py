@@ -1,20 +1,31 @@
-from flask import jsonify
+from flask import jsonify, abort, request
 import datetime
 
 from app import app
 from app.models import db, Actor, Movie
 
-### Actor Endpoints
+#### Actor Endpoints
 
 
 ## Add actor to db
 @app.route('/actors', methods=['POST'])
 def add_actor():
-    actor = Actor(name='sandra', age=25, gender='other')
+
+    # access request data
+    try:
+        body = request.get_json()
+        name = body.get('name', None)
+        age = body.get('age', None)
+        gender = body.get('gender', None)
+    except:
+        abort(422)
+
+    actor = Actor(name=name, age=age, gender=gender)
     db.session.add(actor)
     db.session.commit()
     return jsonify({
-        'test': 'this is a test'
+        'success': True,
+        'added actor': name
     })
 
 
@@ -26,16 +37,23 @@ def get_actors():
         'test': 'test'
     })
 
-### Movie Endpoints
+
+#### Movie Endpoints
 
 ## Add movie to db
 @app.route('/movies', methods=['POST'])
 def add_movie():
-    release_date = datetime.datetime(2001, 11, 4)
-    movie = Movie(title='harry potter', release_date=release_date)
+
+    #access request data
+    body = request.get_json()
+    title = body.get('title', None)
+    release_date_string = body.get('release_date')
+    release_date = datetime.datetime.strptime(release_date_string, '%Y-%m-%d')
+
+    movie = Movie(title=title, release_date=release_date)
     db.session.add(movie)
     db.session.commit()
     return jsonify({
-        'added movie': 'harry potter'
+        'success': True,
+        'added movie': title
     })
-
