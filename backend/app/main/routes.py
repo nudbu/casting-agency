@@ -1,14 +1,14 @@
 from flask import jsonify, abort, request
 import datetime
 
-from app import app
+from app.main import bp
 from app.models import db, Actor, Movie
 
 #### Actor Endpoints
 
 
 ## Add actor to db
-@app.route('/actors', methods=['POST'])
+@bp.route('/actors', methods=['POST'])
 def add_actor():
 
     # access request data
@@ -30,7 +30,7 @@ def add_actor():
 
 
 ## Get all actors
-@app.route('/actors')
+@bp.route('/actors')
 def get_actors():
     actors = Actor.query.all()
     return jsonify({
@@ -41,7 +41,7 @@ def get_actors():
 #### Movie Endpoints
 
 ## Add movie to db
-@app.route('/movies', methods=['POST'])
+@bp.route('/movies', methods=['POST'])
 def add_movie():
 
     #access request data

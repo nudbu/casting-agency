@@ -8,7 +8,13 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+from app.main import bp as main_bp
+app.register_blueprint(main_bp)
+
 from app.errors import bp as errors_bp
 app.register_blueprint(errors_bp)
+
+from app.auth import bp as auth_bp
+app.register_blueprint(auth_bp)
 
 from app import routes, models
