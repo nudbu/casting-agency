@@ -14,11 +14,27 @@ class Actor(db.Model):
   gender = db.Column(db.Enum(Gender), nullable=False)
   movies = db.relationship('MovieCast', backref='ac')
 
+  def format(self):
+    return {
+      'id': self.id,
+      'name': self.name,
+      'age': self.age,
+      'gender': self.gender.name
+    }
+
+
 class Movie(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   title = db.Column(db.String(), nullable=False)
   release_date = db.Column(db.Date, nullable=False)
   cast = db.relationship('MovieCast', backref='mov')
+
+  def format(self):
+    return {
+      'id': self.id,
+      'title': self.title,
+      'release_date': self.release_date
+    }
 
 
 ## Junction Table for many-to-many relationship between Actors and Movies
