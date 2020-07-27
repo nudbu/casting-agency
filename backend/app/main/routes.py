@@ -63,6 +63,18 @@ def get_all_actors():
 ## Delete Actor
 @bp.route('/actors/<int:actor_id>', methods=['DELETE'])
 def delete_actor(actor_id):
+    actor = Actor.query.get_or_404(actor_id)
+
+    # delete from db
+    try:
+        db.session.delete(actor)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
+
     return jsonify({
         'success': True,
         'deleted_actor': actor_id,
@@ -71,7 +83,12 @@ def delete_actor(actor_id):
 
 
 ## Update Actor Info
-
+@bp.route('/actors/<int:actor_id>', methods=['PATCH'])
+def update_actor(actor_id):
+    return jsonify({
+        'success': True,
+        'updated_actor': 'test'
+    })
 
 #### Movie Endpoints
 
@@ -111,6 +128,26 @@ def get_all_movies():
         'total_movies': len(movies)
     })
 
+## Delete Movie
+@bp.route('/movies/<int:movie_id>', methods=['DELETE'])
+def movie(movie_id):
+    movie = Movie.query.get_or_404(movie_id)
+
+    # delete from db
+    try:
+        db.session.delete(movie)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
+
+    return jsonify({
+        'success': True,
+        'deleted_movie': movie_id,
+        'total_movie': Movie.query.count()
+    })
 
 #### Booking Endpoints
 
