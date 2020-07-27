@@ -6,7 +6,7 @@ from app.models import db, Actor, Movie, MovieCast
 
 
 
-PAGINATE_LIMIT_DEFAULT = 15
+PAGINATE_LIMIT_DEFAULT = 7
 
 def paginate(request, selection):
   offset = request.args.get('offset', 1, type=int)
@@ -16,6 +16,9 @@ def paginate(request, selection):
 
   formatted_elements = [element.format() for element in selection[start_index:end_index]]
   return formatted_elements
+
+def date_from_string(date_string):
+    return datetime.datetime.strptime(date_string, '%Y-%m-%d')
 
 #### Actor Endpoints
 
@@ -27,12 +30,13 @@ def add_actor():
     try:
         body = request.get_json()
         name = body.get('name', None)
-        age = body.get('age', None)
+        birthdate_string = body.get('birthdate')
+        birthdate = date_from_string(birthdate_string)
         gender = body.get('gender', None)
     except:
         abort(422)
 
-    actor = Actor(name=name, age=age, gender=gender)
+    actor = Actor(name=name, birthdate=birthdate, gender=gender)
     db.session.add(actor)
     db.session.commit()
     actor_id = actor.id
@@ -55,6 +59,20 @@ def get_all_actors():
         'total_actors': len(actors)
     })
 
+
+## Delete Actor
+@bp.route('/actors/<int:actor_id>', methods=['DELETE'])
+def delete_actor(actor_id):
+    return jsonify({
+        'success': True,
+        'deleted_actor': actor_id,
+        'total_actors': Actor.query.count()
+    })
+
+
+## Update Actor Info
+
+
 #### Movie Endpoints
 
 ## Add movie to db
@@ -66,7 +84,7 @@ def add_movie():
         body = request.get_json()
         title = body.get('title', None)
         release_date_string = body.get('release_date')
-        release_date = datetime.datetime.strptime(release_date_string, '%Y-%m-%d')
+        release_date = date_from_string(release_date_string)
     except:
         abort(422)
 
@@ -89,7 +107,7 @@ def get_all_movies():
 
     return jsonify({
         'success': True,
-        'actors': formatted_movies_page,
+        'movies': formatted_movies_page,
         'total_movies': len(movies)
     })
 
