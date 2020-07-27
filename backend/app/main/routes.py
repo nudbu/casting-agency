@@ -85,9 +85,38 @@ def delete_actor(actor_id):
 ## Update Actor Info
 @bp.route('/actors/<int:actor_id>', methods=['PATCH'])
 def update_actor(actor_id):
+    actor = Actor.query.get_or_404(actor_id)
+
+    # access request data
+    try:
+        body = request.get_json()
+        name = body.get('name', None)
+        birthdate_string = body.get('birthdate', None)
+        gender = body.get('gender', None)
+    except:
+        abort(422)
+
+    if name:
+        actor.name = name
+    if gender:
+        actor.gender = gender
+    if birthdate_string:
+        actor.birthdate = date_from_string(birthdate_string)  
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
+
+    actor = Actor.query.get(actor_id)
+    formatted_actor = actor.format()
+
     return jsonify({
         'success': True,
-        'updated_actor': 'test'
+        'updated_actor': formatted_actor
     })
 
 #### Movie Endpoints
@@ -147,6 +176,40 @@ def movie(movie_id):
         'success': True,
         'deleted_movie': movie_id,
         'total_movie': Movie.query.count()
+    })
+
+## Update Movie Info
+@bp.route('/movies/<int:movie_id>', methods=['PATCH'])
+def update_movie(movie_id):
+    movie = Movie.query.get_or_404(movie_id)
+
+    # access request data
+    try:
+        body = request.get_json()
+        title = body.get('title', None)
+        release_date_string = body.get('release_date', None)
+    except:
+        abort(422)
+
+    if title:
+        movie.title = title
+    if release_date_string:
+        movie.release_date = date_from_string(release_date_string)  
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
+
+    movie = Movie.query.get(movie_id)
+    formatted_movie = movie.format()
+
+    return jsonify({
+        'success': True,
+        'updated_movie': formatted_movie
     })
 
 #### Booking Endpoints
