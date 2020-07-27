@@ -1,6 +1,10 @@
 from enum import Enum
+from datetime import date
 from app import db
 
+def calculate_age(born):
+    today = date.today()
+    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
 class Gender(Enum):
     female = 1
@@ -10,7 +14,7 @@ class Gender(Enum):
 class Actor(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(), nullable=False)
-  age = db.Column(db.Integer, nullable=False)
+  birthdate = db.Column(db.Date, nullable=False)
   gender = db.Column(db.Enum(Gender), nullable=False)
   movies = db.relationship('MovieCast', backref='ac')
 
@@ -18,7 +22,7 @@ class Actor(db.Model):
     return {
       'id': self.id,
       'name': self.name,
-      'age': self.age,
+      'age': calculate_age(self.birthdate),
       'gender': self.gender.name
     }
 
