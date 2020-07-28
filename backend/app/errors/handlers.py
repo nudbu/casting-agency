@@ -21,6 +21,11 @@ def forbidden(error):
         'error message': "Unauthenticated. Identity not verified"
     }), 401
 
+@bp.app_errorhandler(422)
+def unprocessable(error):
+    return jsonify({
+        'error message': "Unprocessable Entity"
+    }), 422
 
 @bp.app_errorhandler(500)
 def forbidden(error):
