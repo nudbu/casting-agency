@@ -3,11 +3,10 @@ import datetime
 
 from app.main import bp
 from app.models import db, Actor, Movie, MovieCast
-
+from app.helpers import string_from_date, date_from_string
 
 
 PAGINATE_LIMIT_DEFAULT = 7
-DATE_FORMAT = '%Y-%m-%d'
 
 def paginate(request, selection):
   offset = request.args.get('offset', 1, type=int)
@@ -17,12 +16,6 @@ def paginate(request, selection):
 
   formatted_elements = [element.format() for element in selection[start_index:end_index]]
   return formatted_elements
-
-def date_from_string(date_string):
-    return datetime.datetime.strptime(date_string, DATE_FORMAT)
-
-def string_from_date(date):
-    return date.strftime(DATE_FORMAT)
 
 
 #### Actor Endpoints
@@ -40,6 +33,7 @@ def add_actor():
         gender = body.get('gender', None)
     except:
         abort(422)
+
 
     actor = Actor(name=name, birthdate=birthdate, gender=gender)
     db.session.add(actor)

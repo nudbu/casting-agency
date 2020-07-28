@@ -1,6 +1,7 @@
 from enum import Enum
 from datetime import date
 from app import db
+from app.helpers import string_from_date
 
 def calculate_age(born):
     today = date.today()
