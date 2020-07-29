@@ -47,3 +47,10 @@ class MovieCast(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   actor_id = db.Column(db.Integer, db.ForeignKey('actor.id'), nullable=False)
   movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+
+  def format(self):
+    return {
+      'id': self.id,
+      'actor_id': self.actor_id,
+      'movie_id': self.movie_id
+    }
