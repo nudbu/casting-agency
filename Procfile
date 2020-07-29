@@ -1,1 +1,1 @@
-web: flask db upgrade; gunicorn backend:app
+web: gunicorn --chdir backend entrypoint:app
