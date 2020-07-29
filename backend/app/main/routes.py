@@ -95,12 +95,16 @@ def update_actor(actor_id):
     except:
         abort(422)
 
-    if name:
-        actor.name = name
-    if gender:
-        actor.gender = gender
-    if birthdate_string:
-        actor.birthdate = date_from_string(birthdate_string)  
+    # update values; if none is specified abort 422
+    if any([name, birthdate_string, gender]):
+        if name:
+            actor.name = name
+        if gender:
+            actor.gender = gender
+        if birthdate_string:
+            actor.birthdate = date_from_string(birthdate_string)  
+    else:
+        abort(422)
 
     try:
         db.session.commit()
@@ -190,10 +194,14 @@ def update_movie(movie_id):
     except:
         abort(422)
 
-    if title:
-        movie.title = title
-    if release_date_string:
-        movie.release_date = date_from_string(release_date_string)  
+    # update values; if none is specified abort 422
+    if any([title, release_date_string]):
+        if title:
+            movie.title = title
+        if release_date_string:
+            movie.release_date = date_from_string(release_date_string)
+    else:
+        abort(422)
 
     try:
         db.session.commit()
