@@ -9,7 +9,7 @@ from app.helpers import string_from_date, date_from_string
 PAGINATE_LIMIT_DEFAULT = 7
 
 def paginate(request, selection):
-  offset = request.args.get('offset', 1, type=int)
+  offset = request.args.get('page', 1, type=int)
   limit = request.args.get('limit', PAGINATE_LIMIT_DEFAULT, type=int)
   start_index = (offset - 1) * limit
   end_index = start_index + limit
@@ -18,7 +18,7 @@ def paginate(request, selection):
   return formatted_elements
 
 
-#### Actor Endpoints
+########## Actor Endpoints
 
 ## Add actor to db
 @bp.route('/actors', methods=['POST'])
@@ -34,16 +34,20 @@ def add_actor():
     except:
         abort(422)
 
-
     actor = Actor(name=name, birthdate=birthdate, gender=gender)
-    db.session.add(actor)
-    db.session.commit()
-    actor_id = actor.id
+    try:
+        db.session.add(actor)
+        db.session.commit()
+        formatted_actor = actor.format()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
 
     return jsonify({
         'success': True,
-        'added actor': name,
-        'actor_id': actor_id
+        'added_actor': formatted_actor,
     })
 
 ## Get Actors paginated
@@ -51,6 +55,10 @@ def add_actor():
 def get_all_actors():
     actors = Actor.query.order_by(Actor.name).all()
     formatted_actors_page = paginate(request, actors)
+
+    # handle page number out of range
+    if not formatted_actors_page:
+        abort(404)
 
     return jsonify({
         'success': True,
@@ -63,6 +71,7 @@ def get_all_actors():
 @bp.route('/actors/<int:actor_id>', methods=['DELETE'])
 def delete_actor(actor_id):
     actor = Actor.query.get_or_404(actor_id)
+    formatted_actor = actor.format()
 
     # delete from db
     try:
@@ -76,7 +85,7 @@ def delete_actor(actor_id):
 
     return jsonify({
         'success': True,
-        'deleted_actor': actor_id,
+        'deleted_actor': formatted_actor,
         'total_actors': Actor.query.count()
     })
 
@@ -95,7 +104,7 @@ def update_actor(actor_id):
     except:
         abort(422)
 
-    # update values; if none is specified abort 422
+    # update values; if none is given abort 422
     if any([name, birthdate_string, gender]):
         if name:
             actor.name = name
@@ -122,7 +131,7 @@ def update_actor(actor_id):
         'updated_actor': formatted_actor
     })
 
-#### Movie Endpoints
+########## Movie Endpoints
 
 ## Add movie to db
 @bp.route('/movies', methods=['POST'])
@@ -138,14 +147,19 @@ def add_movie():
         abort(422)
 
     movie = Movie(title=title, release_date=release_date)
-    db.session.add(movie)
-    db.session.commit()
-    movie_id = movie.id
+    try:
+        db.session.add(movie)
+        db.session.commit()
+        formatted_movie = movie.format()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
 
     return jsonify({
         'success': True,
-        'added movie': title,
-        'movie_id': movie_id
+        'added_movie': formatted_movie,
     })
 
 ## Get Movies paginated
@@ -153,6 +167,10 @@ def add_movie():
 def get_all_movies():
     movies = Movie.query.order_by(Movie.title).all()
     formatted_movies_page = paginate(request, movies)
+
+    # handle page number out of range
+    if not formatted_movies_page:
+      abort(404)
 
     return jsonify({
         'success': True,
@@ -164,8 +182,8 @@ def get_all_movies():
 @bp.route('/movies/<int:movie_id>', methods=['DELETE'])
 def movie(movie_id):
     movie = Movie.query.get_or_404(movie_id)
+    formatted_movie = movie.format()
 
-    # delete from db
     try:
         db.session.delete(movie)
         db.session.commit()
@@ -177,8 +195,8 @@ def movie(movie_id):
 
     return jsonify({
         'success': True,
-        'deleted_movie': movie_id,
-        'total_movie': Movie.query.count()
+        'deleted_movie': formatted_movie,
+        'total_movies': Movie.query.count()
     })
 
 ## Update Movie Info
@@ -203,6 +221,8 @@ def update_movie(movie_id):
     else:
         abort(422)
 
+    formatted_movie = movie.format()
+
     try:
         db.session.commit()
     except:
@@ -211,15 +231,12 @@ def update_movie(movie_id):
     finally:
         db.session.close()
 
-    movie = Movie.query.get(movie_id)
-    formatted_movie = movie.format()
-
     return jsonify({
         'success': True,
         'updated_movie': formatted_movie
     })
 
-#### Booking Endpoints
+########## Booking Endpoints
 
 ## book Actor for Movie
 
@@ -228,18 +245,28 @@ def add_contract():
     #access request data
     try:
         body = request.get_json()
-        movie_id = body.get('movie_id', None)
-        actor_id = body.get('actor_id', None)
+        movie_id = body['movie_id']
+        actor_id = body['actor_id']
     except:
         abort(422)
 
+    # 404, if movie or actor doesn't exist
+    movie = Movie.query.get_or_404(movie_id)
+    actor = Actor.query.get_or_404(actor_id)
+
+    # add contract
     contract = MovieCast(actor_id=actor_id, movie_id=movie_id)
-    db.session.add(contract)
-    db.session.commit()
+    try:
+        db.session.add(contract)
+        db.session.commit()
+        formatted_contract = contract.format()
+    except:
+        db.session.rollback()
+        abort(500)
+    finally:
+        db.session.close()
 
     return jsonify({
         'success': True,
-        'added contract': 'id',
-        'movie_id': movie_id,
-        'actor_id': actor_id 
+        'added_contract': formatted_contract,
     })

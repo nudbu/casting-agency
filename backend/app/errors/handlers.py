@@ -5,7 +5,7 @@ from app.errors import bp
 def not_found(error):
     return jsonify({
         'success': False,
-        'error message': 'Resource Not Found'
+        'message': 'Resource Not Found'
     }), 404
 
 
@@ -13,7 +13,7 @@ def not_found(error):
 def forbidden(error):
     return jsonify({
         'success': False,
-        'error message': "No permission for requested action"
+        'message': "No permission for requested action"
     }), 403
 
 
@@ -21,20 +21,20 @@ def forbidden(error):
 def forbidden(error):
     return jsonify({
         'success': False,
-        'error message': "Unauthenticated. Identity not verified"
+        'message': "Unauthenticated. Identity not verified"
     }), 401
 
 @bp.app_errorhandler(422)
 def unprocessable(error):
     return jsonify({
         'success': False,
-        'error message': "Unprocessable Entity"
+        'message': "Unprocessable Entity"
     }), 422
 
 @bp.app_errorhandler(500)
 def forbidden(error):
     return jsonify({
         'success': False,
-        'error message': "Internal Server Error"
+        'message': "Internal Server Error"
     }), 500
     
