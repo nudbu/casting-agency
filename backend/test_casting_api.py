@@ -69,7 +69,7 @@ class CastingAgencyTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertTrue(data.get('message'))
+        self.assertTrue(data.get('description'))
 
     def test_add_actor(self):
         # send request: add new actor to database
@@ -150,7 +150,7 @@ class CastingAgencyTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertTrue(data.get('message'))
+        self.assertTrue(data.get('description'))
 
     def test_add_movie(self):
         # send request: add new movie to database
@@ -313,7 +313,7 @@ class CastingAgencyTestCaseDirector(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertTrue(data.get('message'))
+        self.assertTrue(data.get('description'))
 
     def test_add_actor(self):
         # send request: add new actor to database
@@ -394,25 +394,24 @@ class CastingAgencyTestCaseDirector(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertTrue(data.get('message'))
+        self.assertTrue(data.get('description'))
 
     def test_add_movie(self):
         # send request: add new movie to database
         res = self.client().post('/movies', json=self.new_movie, headers=self.director_headers)
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get("success"), True)
-        self.assertTrue(data.get('added_movie'))
-
-        # check that movie persists in database
-        movie = Movie.query.filter_by(title=self.new_movie.get('title')).first()
-        self.assertEqual(movie.title, self.new_movie.get('title'))
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_if_movie_creation_failed(self):
         res = self.client().post('/movies', json={}, headers=self.director_headers)
-        self.assertEqual(res.status_code, 422)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_patch_movie(self):
@@ -445,16 +444,17 @@ class CastingAgencyTestCaseDirector(unittest.TestCase):
         res = self.client().delete('/movies/1', headers=self.director_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(data.get('deleted_movie'))
-        self.assertTrue(type(data.get('total_movies')) is int)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
     def test_404_delete_non_existing_movie(self):
         res = self.client().delete('/movies/1000', headers=self.director_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
 ############# Contracts
@@ -467,9 +467,9 @@ class CastingAgencyTestCaseDirector(unittest.TestCase):
         res = self.client().post('/contracts', json=new_contract, headers=self.director_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get('success'), True)
-        self.assertTrue(data.get('added_contract'))
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_404_failed_to_add_contract(self):
@@ -481,8 +481,9 @@ class CastingAgencyTestCaseDirector(unittest.TestCase):
         res = self.client().post('/contracts', json=new_contract, headers=self.director_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_failed_to_add_contract(self):
@@ -493,8 +494,9 @@ class CastingAgencyTestCaseDirector(unittest.TestCase):
         res = self.client().post('/contracts', json=new_contract, headers=self.director_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 422)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
    
 
 
@@ -556,7 +558,7 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertTrue(data.get('message'))
+        self.assertTrue(data.get('description'))
 
     def test_add_actor(self):
         # send request: add new actor to database
@@ -564,14 +566,16 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 403)
-        self.assertEqual(data.get("success"), True)
-        self.assertTrue(data.get('added_actor'))
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_if_actor_creation_failed(self):
         res = self.client().post('/actors', json={}, headers=self.assistant_headers)
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_patch_actor(self):
@@ -583,36 +587,34 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
         res = self.client().patch('/actors/1', json=updated_actor, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get("success"), True)
-        self.assertTrue(data.get("updated_actor"))
-        # check persistance in db
-        actor = Actor.query.get(1)
-        self.assertEqual(actor.name, updated_actor.get('name'))
-        self.assertEqual(string_from_date(actor.birthdate), updated_actor.get('birthdate'))
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_if_actor_patch_failed(self):
         res = self.client().patch('/actors/1', json={}, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
     def test_delete_actor(self):
         res = self.client().delete('/actors/1', headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(data.get('deleted_actor'))
-        self.assertTrue(type(data.get('total_actors')) is int)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
     def test_404_delete_non_existing_actor(self):
         res = self.client().delete('/actors/1000', headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
 
@@ -633,25 +635,24 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
-        self.assertTrue(data.get('message'))
+        self.assertTrue(data.get('description'))
 
     def test_add_movie(self):
         # send request: add new movie to database
         res = self.client().post('/movies', json=self.new_movie, headers=self.assistant_headers)
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get("success"), True)
-        self.assertTrue(data.get('added_movie'))
-
-        # check that movie persists in database
-        movie = Movie.query.filter_by(title=self.new_movie.get('title')).first()
-        self.assertEqual(movie.title, self.new_movie.get('title'))
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_if_movie_creation_failed(self):
         res = self.client().post('/movies', json={}, headers=self.assistant_headers)
-        self.assertEqual(res.status_code, 422)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_patch_movie(self):
@@ -663,37 +664,35 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
         res = self.client().patch('/movies/1', json=updated_movie, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get("success"), True)
-        self.assertTrue(data.get("updated_movie"))
-        # check persistance in db
-        movie = Movie.query.get(1)
-        self.assertEqual(movie.title, updated_movie.get('title'))
-        self.assertEqual(string_from_date(movie.release_date), updated_movie.get('release_date'))
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_if_movie_patch_failed(self):
         res = self.client().patch('/movies/1', json={}, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_delete_movie(self):
         res = self.client().delete('/movies/1', headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(data.get('deleted_movie'))
-        self.assertTrue(type(data.get('total_movies')) is int)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
     def test_404_delete_non_existing_movie(self):
         res = self.client().delete('/movies/1000', headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
 ############# Contracts
@@ -706,9 +705,9 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
         res = self.client().post('/contracts', json=new_contract, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get('success'), True)
-        self.assertTrue(data.get('added_contract'))
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_404_failed_to_add_contract(self):
@@ -720,8 +719,9 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
         res = self.client().post('/contracts', json=new_contract, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
     def test_422_failed_to_add_contract(self):
@@ -732,8 +732,9 @@ class CastingAgencyTestCaseAssistant(unittest.TestCase):
         res = self.client().post('/contracts', json=new_contract, headers=self.assistant_headers)
         data = json.loads(res.data)
         # check response
-        self.assertEqual(res.status_code, 422)
-        self.assertEqual(data.get('success'), False)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data.get("success"), False)
+        self.assertTrue(data.get('description'))
 
 
 
