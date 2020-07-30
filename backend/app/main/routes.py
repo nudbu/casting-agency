@@ -4,7 +4,7 @@ import datetime
 from app.main import bp
 from app.models import db, Actor, Movie, MovieCast
 from app.helpers import string_from_date, date_from_string
-# from app.auth.auth import requires_auth, AuthError
+from app.auth.auth import requires_auth
 PAGINATE_LIMIT_DEFAULT = 7
 
 def paginate(request, selection):
@@ -36,7 +36,7 @@ def login_callback():
 
 ## Add actor to db
 @bp.route('/actors', methods=['POST'])
-# @requires_auth('add:actors')
+@requires_auth('add:actors')
 def add_actor():
 
     # access request data
@@ -67,7 +67,7 @@ def add_actor():
 
 ## Get Actors paginated
 @bp.route('/actors')
-# @requires_auth('get:actors')
+@requires_auth('get:actors')
 def get_all_actors():
     actors = Actor.query.order_by(Actor.name).all()
     formatted_actors_page = paginate(request, actors)
@@ -85,6 +85,7 @@ def get_all_actors():
 
 ## Delete Actor
 @bp.route('/actors/<int:actor_id>', methods=['DELETE'])
+@requires_auth('delete:actors')
 def delete_actor(actor_id):
     actor = Actor.query.get_or_404(actor_id)
     formatted_actor = actor.format()
@@ -108,6 +109,7 @@ def delete_actor(actor_id):
 
 ## Update Actor Info
 @bp.route('/actors/<int:actor_id>', methods=['PATCH'])
+@requires_auth('patch:actors')
 def update_actor(actor_id):
     actor = Actor.query.get_or_404(actor_id)
 
@@ -151,6 +153,7 @@ def update_actor(actor_id):
 
 ## Add movie to db
 @bp.route('/movies', methods=['POST'])
+@requires_auth('add:movies')
 def add_movie():
 
     #access request data
@@ -180,6 +183,7 @@ def add_movie():
 
 ## Get Movies paginated
 @bp.route('/movies')
+@requires_auth('get:movies')
 def get_all_movies():
     movies = Movie.query.order_by(Movie.title).all()
     formatted_movies_page = paginate(request, movies)
@@ -196,6 +200,7 @@ def get_all_movies():
 
 ## Delete Movie
 @bp.route('/movies/<int:movie_id>', methods=['DELETE'])
+@requires_auth('delete:movies')
 def movie(movie_id):
     movie = Movie.query.get_or_404(movie_id)
     formatted_movie = movie.format()
@@ -217,6 +222,7 @@ def movie(movie_id):
 
 ## Update Movie Info
 @bp.route('/movies/<int:movie_id>', methods=['PATCH'])
+@requires_auth('patch:movies')
 def update_movie(movie_id):
     movie = Movie.query.get_or_404(movie_id)
 
@@ -257,6 +263,7 @@ def update_movie(movie_id):
 ## book Actor for Movie
 
 @bp.route('/contracts', methods=['POST'])
+@requires_auth('add:contracts')
 def add_contract():
     #access request data
     try:
