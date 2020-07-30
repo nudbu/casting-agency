@@ -25,7 +25,7 @@ def welcome():
     })
 
 @bp.route('/callback')
-def welcome():
+def login_callback():
     return jsonify({
         'success': True,
         'message': 'Login successful'
