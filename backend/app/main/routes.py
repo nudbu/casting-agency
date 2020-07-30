@@ -4,8 +4,7 @@ import datetime
 from app.main import bp
 from app.models import db, Actor, Movie, MovieCast
 from app.helpers import string_from_date, date_from_string
-
-
+# from app.auth.auth import requires_auth, AuthError
 PAGINATE_LIMIT_DEFAULT = 7
 
 def paginate(request, selection):
@@ -18,10 +17,26 @@ def paginate(request, selection):
   return formatted_elements
 
 
+@bp.route('/')
+def welcome():
+    return jsonify({
+        'success': True,
+        'message': 'Welcome to the Casting Agency API'
+    })
+
+@bp.route('/callback')
+def welcome():
+    return jsonify({
+        'success': True,
+        'message': 'Login successful'
+    })
+
+
 ########## Actor Endpoints
 
 ## Add actor to db
 @bp.route('/actors', methods=['POST'])
+# @requires_auth('add:actors')
 def add_actor():
 
     # access request data
@@ -52,6 +67,7 @@ def add_actor():
 
 ## Get Actors paginated
 @bp.route('/actors')
+# @requires_auth('get:actors')
 def get_all_actors():
     actors = Actor.query.order_by(Actor.name).all()
     formatted_actors_page = paginate(request, actors)
