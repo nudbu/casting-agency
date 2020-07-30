@@ -1,11 +1,12 @@
 from flask import jsonify
 from app.errors import bp
+from app.auth.auth import AuthError
 
 @bp.app_errorhandler(404)
 def not_found(error):
     return jsonify({
         'success': False,
-        'message': 'Resource Not Found'
+        'description': 'Resource Not Found'
     }), 404
 
 
@@ -13,7 +14,7 @@ def not_found(error):
 def forbidden(error):
     return jsonify({
         'success': False,
-        'message': "No permission for requested action"
+        'description': "No permission for requested action"
     }), 403
 
 
@@ -21,20 +22,26 @@ def forbidden(error):
 def forbidden(error):
     return jsonify({
         'success': False,
-        'message': "Unauthenticated. Identity not verified"
+        'description': "Unauthenticated. Identity not verified"
     }), 401
 
 @bp.app_errorhandler(422)
 def unprocessable(error):
     return jsonify({
         'success': False,
-        'message': "Unprocessable Entity"
+        'description': "Unprocessable Entity"
     }), 422
 
 @bp.app_errorhandler(500)
 def forbidden(error):
     return jsonify({
         'success': False,
-        'message': "Internal Server Error"
+        'description': "Internal Server Error"
     }), 500
     
+
+@bp.app_errorhandler(AuthError)
+def auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
